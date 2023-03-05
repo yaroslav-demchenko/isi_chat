@@ -7,23 +7,22 @@ from .models import Thread, Message
 from .serializers import ThreadSerializer, MessageSerializer
 
 
-@api_view(["POST", "DELETE", "GET"])
+@api_view(["POST", "GET"])
 def create_thread(request):
-    if request.method == "GET":
+    if request.method == "GET":  # shows all dialogs for the current user
         threads = Thread.objects.filter(participants=request.user.id)
         serializer = ThreadSerializer(threads, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    participants_id = request.data.get("participants", [])
-    if len(participants_id) != 2:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    thread = Thread.objects.filter(participants=participants_id[0]).filter(
-        participants=participants_id[1]
-    )
-
     if request.method == "POST":
+        participants_id = request.data.get("participants", [])
+        if len(participants_id) != 2:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        thread = Thread.objects.filter(participants=participants_id[0]).filter(
+            participants=participants_id[1]
+        )
         if thread:
-            serializer = ThreadSerializer(thread.get())
+            serializer = ThreadSerializer(thread.first())
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             serializer = ThreadSerializer(data=request.data)
@@ -32,9 +31,12 @@ def create_thread(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    if request.method == "DELETE":
-        thread.get().delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["DELETE"])
+def delete_thread(request, thread_id):
+    tread = Thread.objects.get(pk=thread_id)
+    tread.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MessageListCreateAPIView(generics.ListCreateAPIView):

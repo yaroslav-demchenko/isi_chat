@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
 )
 from .views import (
     create_thread,
+    delete_thread,
     MessageListCreateAPIView,
     unread_messages_count,
     mark_message_as_read,
@@ -14,6 +15,7 @@ app_name = "myapp"
 
 urlpatterns = [
     path("threads/", create_thread, name="create_thread"),
+    path("threads/<int:thread_id>/", delete_thread, name="delete_thread"),
     path(
         "threads/<int:thread_id>/messages/",
         MessageListCreateAPIView.as_view(),
