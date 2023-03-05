@@ -34,7 +34,7 @@ def create_thread(request):
 
 @api_view(["DELETE"])
 def delete_thread(request, thread_id):
-    tread = Thread.objects.get(pk=thread_id)
+    tread = get_object_or_404(Thread, pk=thread_id)
     tread.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
